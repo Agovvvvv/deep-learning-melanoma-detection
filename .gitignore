@@ -1,0 +1,6 @@
+__pycache__
+.ipynb_checkpoints
+HAM10000_melanocytic
+venv
+melanocytic_dataset
+theory
