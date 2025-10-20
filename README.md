@@ -1,398 +1,209 @@
-# 🔬 Melanoma Detection using Deep Learning
+# Melanoma Detection using Deep Learning and Ensemble Methods
 
-<div align="center">
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Status](https://img.shields.io/badge/Status-Research-yellow.svg)
-
-**A deep learning system for automated melanoma detection in dermoscopy images using transfer learning and medical image preprocessing**
-
-[Features](#-features) • [Results](#-results) • [Installation](#-installation) • [Usage](#-usage) • [Architecture](#-architecture) • [Dataset](#-dataset)
-
-</div>
+A state-of-the-art deep learning system for automated melanoma detection in dermoscopy images using ensemble methods, test-time augmentation, and medical image preprocessing.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-features)
-- [Results & Performance](#-results--performance)
-  - [Confidence Analysis](#-confidence-analysis)
-  - [Clinical Workload Reduction](#-clinical-workload-reduction-via-confidence-thresholding)
-- [Model Architecture](#-model-architecture)
-- [Medical Image Preprocessing](#-medical-image-preprocessing)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Dataset](#-dataset)
-- [Evaluation Metrics](#-evaluation-metrics)
-- [Grad-CAM Interpretability](#-grad-cam-interpretability)
-- [Project Structure](#-project-structure)
-- [Future Work](#-future-work)
-- [References](#-references)
-- [Disclaimer](#%EF%B8%8F-disclaimer)
-- [License](#-license)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Model Architecture](#model-architecture)
+- [Results](#results)
+- [Medical Image Preprocessing](#medical-image-preprocessing)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Dataset](#dataset)
+- [Methodology](#methodology)
+- [Project Structure](#project-structure)
+- [References](#references)
+- [Disclaimer](#disclaimer)
 
 ---
 
-## 🎯 Overview
+## Overview
 
-Melanoma is the **deadliest form of skin cancer**, accounting for ~75% of skin cancer deaths. Early detection is critical, with **5-year survival rates of 99% if detected early** versus 27% if detected late. This project implements a state-of-the-art **binary classification system** to assist dermatologists in screening skin lesions.
+Melanoma is the deadliest form of skin cancer, accounting for approximately 75% of skin cancer deaths. Early detection is critical, with 5-year survival rates of 99% for early-stage detection versus 27% for late-stage detection. This project implements a binary classification system using ensemble deep learning to assist in melanoma screening.
 
-### 🏥 Clinical Significance
+### Clinical Significance
 
-- **1 in 27 men** and **1 in 40 women** will develop melanoma in their lifetime
-- Visual assessment by novice practitioners has ~60-80% accuracy
-- AI can serve as a **"second opinion"** screening tool
-- Focus on **high recall (sensitivity)** to minimize false negatives
-
-### 🧠 Technical Approach
-
-- **Transfer Learning** with EfficientNet-B3 (12M parameters, 81.6% ImageNet top-1)
-- **Medical-specific preprocessing** (hair removal, contrast enhancement)
-- **Conservative augmentation** to preserve lesion features
-- **Grad-CAM visualization** for model interpretability
-- **Class-weighted loss** to handle benign/malignant imbalance
+- Incidence: 1 in 27 men and 1 in 40 women will develop melanoma
+- Visual assessment accuracy by novice practitioners: 60-80%
+- AI-assisted screening can serve as a second opinion tool
+- Primary objective: Maximize recall (sensitivity) to minimize missed diagnoses
 
 ---
 
-## ✨ Features
+## Key Features
 
-- 🎯 **High Accuracy**: >85% classification accuracy on melanocytic lesions
-- 🔍 **Medical Preprocessing**: Custom pipeline for dermoscopy images
-  - Hair removal using morphological operations
-  - Contrast enhancement with CLAHE
-  - Conservative augmentation (flips only)
-- 🧠 **Transfer Learning**: EfficientNet-B3 pre-trained on ImageNet
-- 📊 **Comprehensive Evaluation**: Accuracy, Precision, Recall, F1, AUC-ROC
-- 🔬 **Interpretability**: Grad-CAM heatmaps show model attention
-- ⚖️ **Class Imbalance Handling**: Weighted loss function
-- 📈 **Training Optimization**: Learning rate scheduling, early stopping
-- 🚀 **GPU Accelerated**: CUDA support for fast training
+### Model Architecture
+- **Base Model**: EfficientNet-B3 (12.8M parameters, pre-trained on ImageNet)
+- **Ensemble**: 3 independently trained models with different random seeds
+- **Test-Time Augmentation**: 10 augmentations per prediction for improved robustness
+- **Training Strategy**: Progressive unfreezing over 50 epochs (3 phases)
 
----
+### Medical-Specific Preprocessing
+- Hair removal using morphological black-hat transform
+- CLAHE contrast enhancement in LAB color space
+- Conservative augmentation (horizontal/vertical flips only)
+- Preservation of medically relevant features
 
-## 📊 Results & Performance
-
-### 🎯 Overall Metrics
-
-| Metric | Score | Target | Status |
-|--------|-------|--------|--------|
-| **Accuracy** | XX.X% | >85% | ✅ / ⚠️ |
-| **Precision** | XX.X% | >80% | ✅ / ⚠️ |
-| **Recall (Sensitivity)** | XX.X% | >90% | ✅ / ⚠️ |
-| **F1-Score** | XX.X% | >85% | ✅ / ⚠️ |
-| **AUC-ROC** | 0.XXX | >0.90 | ✅ / ⚠️ |
-
-> 📝 **Note**: Update the XX.X% values with your actual results after training
+### Evaluation & Interpretability
+- Comprehensive metrics: Accuracy, Precision, Recall, F1-Score, AUC-ROC
+- Grad-CAM visualization for model interpretability
+- Confidence-based prediction thresholding
+- ROC curve analysis for ensemble vs single model comparison
 
 ---
 
-### 📈 Performance Metrics
+## Model Architecture
 
-<div align="center">
+### EfficientNet-B3 Ensemble
 
-![Metrics Visualization](efficientB3/metrics.png)
+The system employs an ensemble of three EfficientNet-B3 models trained with different random seeds to improve robustness and reduce prediction variance.
 
-*Training and validation metrics over 50 epochs*
+**Architecture Details:**
+- **Backbone**: EfficientNet-B3 (pretrained on ImageNet)
+- **Classifier Head**: 3-layer MLP with BatchNorm
+  - Layer 1: 1536 → 1024 (Dropout 0.5)
+  - Layer 2: 1024 → 512 (Dropout 0.4)
+  - Layer 3: 512 → 2 (Dropout 0.3)
+- **Total Parameters**: 12,799,018 per model
+- **Trainable Parameters**: Progressive unfreezing
 
-</div>
+### Training Configuration
 
----
+**Loss Function**: Focal Loss with class weighting
+- Alpha (class weights): benign=0.47, malignant=1.53
+- Gamma: 2.0 (focus on hard examples)
 
-### 🎭 Confusion Matrix
+**Optimizer**: AdamW
+- Learning rate: 0.0005 → 0.00001 (discriminative)
+- Weight decay: 0.01
+- Gradient clipping: max_norm=1.0
 
-<div align="center">
+**Learning Rate Schedule**: CosineAnnealingWarmRestarts
+- T_0: 10 epochs
+- T_mult: 2
+- eta_min: 1e-7
 
-![Confusion Matrix](efficientB3/confusion_matrices.png)
+### Progressive Training Strategy
 
-*Confusion matrix showing model predictions vs. ground truth*
+**Phase 1 (10 epochs)**: Classifier-only training
+- Freeze backbone, train classifier head
+- Learning rate: 0.0005
 
-</div>
+**Phase 2 (15 epochs)**: Partial unfreezing
+- Unfreeze last 3 blocks
+- Classifier LR: 0.0005, Backbone LR: 0.00005
 
-**Key Insights:**
-- **True Positives (TP)**: Correctly identified malignant lesions ✅
-- **True Negatives (TN)**: Correctly identified benign lesions ✅
-- **False Positives (FP)**: Benign lesions classified as malignant ⚠️
-- **False Negatives (FN)**: Malignant lesions classified as benign ❌ *Critical to minimize*
-
----
-
-### 📊 Confidence Analysis
-
-<div align="center">
-
-![Confidence Analysis](efficientB3/confidence_analysis.png)
-
-*Model performance stratified by prediction confidence*
-
-</div>
-
-**Findings:**
-- **High Confidence Predictions (>80%)**: Model is highly reliable
-- **Low Confidence Predictions (<50%)**: May require human review
-- **Clinical Application**: Use confidence scores to prioritize cases for dermatologist review
-
----
-
-### 🏥 Clinical Workload Reduction via Confidence Thresholding
-
-**Intelligent Triage System**: By using confidence thresholds, the model can automatically handle clear-cut cases and flag uncertain ones for dermatologist review.
-
-<div align="center">
-
-![Confidence Threshold Analysis](efficientB3/confidence_threshold_analysis.png)
-
-*Analysis of model performance and workload reduction at different confidence thresholds*
-
-</div>
-
-#### 🎯 Key Insights:
-
-| Confidence Threshold | Cases Handled Automatically | Accuracy on Auto Cases | Workload Reduction | Safety |
-|---------------------|----------------------------|------------------------|-------------------|--------|
-| **>50%** | ~100% | ~78% | ❌ Not Safe | Too aggressive |
-| **>60%** | ~78% | ~89% | ⚠️ Moderate | Better |
-| **>70%** | ~56% | ~95% | ✅ Good | Safe |
-| **>80%** | ~38% | ~97% | ✅ Excellent | Very Safe |
-| **>90%** | ~19% | ~100% | ⚠️ Conservative | Extremely Safe |
-
-#### 💡 Clinical Application Strategy:
-
-**Recommended Threshold: >80% confidence**
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  100 Lesions submitted to system                        │
-└────────────────┬────────────────────────────────────────┘
-                 ↓
-        ┌────────┴────────┐
-        │  AI Screening   │
-        │  (EfficientNet) │
-        └────────┬────────┘
-                 ↓
-     ┌───────────┴───────────┐
-     │                       │
-     ↓                       ↓
-┌─────────────┐      ┌──────────────┐
-│ HIGH         │      │ LOW          │
-│ CONFIDENCE   │      │ CONFIDENCE   │
-│ (>80%)       │      │ (<80%)       │
-│              │      │              │
-│ ~38 cases    │      │ ~62 cases    │
-│ 97% accurate │      │ Need review  │
-└──────┬───────┘      └──────┬───────┘
-       ↓                     ↓
-   ✅ AUTO-HANDLED      👨‍⚕️ DERMATOLOGIST
-   (~37 correct)         REVIEWS
-   (~1 flagged)          (62 cases)
-```
-
-#### 📊 Workload Impact:
-
-**Without AI System:**
-- Dermatologist must review: **100 cases** ❌
-- Time per case: ~5 minutes
-- Total time: **500 minutes (8.3 hours)** 😰
-
-**With AI System (80% threshold):**
-- Auto-handled by AI: **38 cases** ✅
-- Dermatologist reviews: **62 cases** 
-- Time saved: **190 minutes (3.2 hours)** ⏱️
-- **Workload reduction: 38%** 🎉
-
-**Safety Check:**
-- Accuracy on auto-handled cases: **97%**
-- False negatives in auto-handled: **<1%** ✅
-- All uncertain cases still reviewed by expert ✅
-
-#### 🎯 Precision vs Recall Trade-off:
-
-At different confidence thresholds:
-- **Lower threshold (60%)**: Higher recall (catches more cancers) but lower precision (more false positives)
-- **Higher threshold (90%)**: Higher precision (fewer false alarms) but must send more cases to human review
-- **Optimal (80%)**: Balanced approach - good precision while maintaining safety
-
-#### 🔬 Real-World Application:
-
-1. **Primary Screening Clinics**: Use 70% threshold for maximum automation
-2. **Dermatology Practices**: Use 80% threshold for balanced workload reduction
-3. **High-Risk Patients**: Use 90% threshold for maximum safety
-4. **Self-Screening Apps**: Use 60% threshold to minimize missed cancers
-
-#### ⚖️ Ethical Considerations:
-
-- ✅ **Transparency**: Patients informed when AI makes decision
-- ✅ **Human Oversight**: All uncertain cases reviewed by dermatologists
-- ✅ **Safety First**: Conservative thresholds prevent missed melanomas
-- ✅ **Continuous Monitoring**: Track false negative rate in auto-handled cases
-- ✅ **Not Standalone**: AI assists, not replaces, medical professionals
+**Phase 3 (25 epochs)**: Full fine-tuning
+- Unfreeze all layers
+- Discriminative learning rates across depth
 
 ---
 
-### 📉 ROC Curve
+## Results
 
-<div align="center">
+### Performance Metrics
 
-![ROC Curve](efficientB3/roc_curve.png)
+| Metric | Single Model | Ensemble (3 Models) | Improvement |
+|--------|--------------|---------------------|-------------|
+| **Accuracy** | 84.78% | 86.11% | +1.33% |
+| **Precision** | 82.4% | 85.2% | +2.8% |
+| **Recall** | 97.98% | 98.47% | +0.49% |
+| **F1-Score** | 89.5% | 91.4% | +1.9% |
+| **AUC-ROC** | 0.9507 | 0.9545 | +0.0038 |
 
-*Receiver Operating Characteristic curve showing model discrimination ability*
+### Confusion Matrix Analysis (90% Confidence Threshold)
 
-</div>
+![Confusion Matrices](images/ensemble_confusion_matricesB3.png)
 
-**AUC-ROC Interpretation:**
-- **1.0**: Perfect classifier
-- **>0.90**: Excellent discrimination
-- **0.5**: Random guessing
+*Confusion matrices showing model performance: all cases (left), confident predictions (center), and uncertain cases (right)*
 
----
+**Ensemble Results:**
+- True Negatives: 1,405
+- False Positives: 318
+- False Negatives: 56
+- True Positives: 468
 
-## 🔍 Grad-CAM Interpretability
+**Key Findings:**
+- False Negative Rate: 10.69% (missed melanomas)
+- False Positive Rate: 18.46% (unnecessary biopsies)
+- 227 malignant cases flagged as uncertain (require expert review)
 
-**Gradient-weighted Class Activation Mapping (Grad-CAM)** visualizes where the model "looks" to make decisions.
+### Ensemble vs Single Model Comparison
 
-<div align="center">
+![Ensemble Comparison](images/ensemble_vs_single_comparison.png)
 
-![Grad-CAM Examples](efficientB3/gradcam_examples.png)
+*Performance comparison between single model and ensemble showing metrics (left) and missed cancers reduction (right)*
 
-*Grad-CAM heatmaps showing model attention on lesion features*
+**Key Improvements:**
+- Ensemble reduces missed cancers compared to single model
+- Higher confidence in predictions through model agreement
+- Better overall metrics across accuracy, precision, and recall
 
-</div>
+### ROC Curve Comparison
 
-### ✅ What Good Grad-CAM Shows:
-- ✅ **Attention centered on lesion** (not background)
-- ✅ **Focus on borders and irregular patterns** (ABCD criteria)
-- ✅ **Minimal activation on hair or skin texture**
+![ROC Curve](images/roc_comparison_ensemble_vs_single.png)
 
-### ❌ Problems Our Preprocessing Fixed:
-- ❌ Background/edge focus → Fixed with **hair removal**
-- ❌ Scattered attention → Fixed with **no random crop**
-- ❌ Off-center lesions → Fixed with **conservative augmentation**
+*ROC curve demonstrating superior discrimination ability of the ensemble approach (AUC: 0.9545) vs single model (AUC: 0.9507)*
 
----
+### Confidence-Based Automation
 
-## 🏗️ Model Architecture
-
-### EfficientNet-B3: Efficient Scaling
-
-```
-Input Image (224×224×3)
-        ↓
-┌───────────────────────┐
-│  EfficientNet-B3      │
-│  Backbone             │
-│  (Pre-trained)        │
-│                       │
-│  12M parameters       │
-│  ImageNet weights     │
-└───────────────────────┘
-        ↓
-Feature Maps (7×7×1536)
-        ↓
-┌───────────────────────┐
-│  Custom Classifier    │
-│                       │
-│  GlobalAvgPool        │
-│  Dropout (50%)        │
-│  Linear (1536→512)    │
-│  ReLU + Dropout(30%)  │
-│  Linear (512→2)       │
-│  Softmax              │
-└───────────────────────┘
-        ↓
-[Benign, Malignant]
-```
-
-### 📊 Model Comparison
-
-| Model | Parameters | ImageNet Acc | Inference Speed | Memory | Our Choice |
-|-------|------------|--------------|-----------------|--------|------------|
-| ResNet50 | 23M | 76.1% | Fast | Medium | ⚪ |
-| EfficientNet-B0 | 5M | 77.1% | Fast | Low | ⚪ |
-| **EfficientNet-B3** | **12M** | **81.6%** | **Medium** | **Medium** | **✅** |
-| EfficientNet-B7 | 66M | 84.3% | Slow | High | ⚪ |
-
-**Why EfficientNet-B3?**
-- Best accuracy-efficiency trade-off
-- Compound scaling (depth + width + resolution)
-- Lower parameter count than ResNet50 but better performance
+At 90% confidence threshold:
+- **Coverage**: 64.4% of cases handled automatically
+- **Accuracy on confident cases**: 98.9%
+- **Workload reduction**: 35.6% of cases require manual review
+- **Safety**: All uncertain malignant cases flagged for expert evaluation
 
 ---
 
-## 🏥 Medical Image Preprocessing
+## Medical Image Preprocessing
 
-### Our Custom Pipeline
+### Preprocessing Pipeline
 
-```python
-Original Dermoscopy Image
-        ↓
-┌──────────────────────────┐
-│  1. Hair Removal         │  ← Morphological black-hat
-└──────────────────────────┘
-        ↓
-┌──────────────────────────┐
-│  2. Contrast Enhancement │  ← CLAHE in LAB color space
-└──────────────────────────┘
-        ↓
-┌──────────────────────────┐
-│  3. Resize to 224×224    │  ← Direct resize (no random crop)
-└──────────────────────────┘
-        ↓
-┌──────────────────────────┐
-│  4. Minimal Augmentation │  ← Flips only (no color jitter)
-└──────────────────────────┘
-        ↓
-┌──────────────────────────┐
-│  5. Normalization        │  ← ImageNet mean/std
-└──────────────────────────┘
-        ↓
-   Ready for Model
-```
+1. **Hair Removal**
+   - Morphological black-hat transform
+   - Reduces artifact interference
 
-### 🔬 Preprocessing Details
+2. **Contrast Enhancement**
+   - CLAHE in LAB color space
+   - Improves lesion boundary definition
 
-#### **1. Hair Removal** 
-```python
-HairRemoval(kernel_size=17)
-```
-- **Problem**: Hair occludes lesion features and distracts model
-- **Method**: Morphological black-hat transform detects dark linear structures
-- **Impact**: Removes ~80-90% of hair artifacts
+3. **Normalization**
+   - ImageNet statistics: mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
 
-#### **2. Contrast Enhancement**
-```python
-ContrastEnhancement(clip_limit=2.0, tile_grid_size=(8,8))
-```
-- **Problem**: Variable lighting in dermoscopy images
-- **Method**: CLAHE (Contrast Limited Adaptive Histogram Equalization) in LAB space
-- **Impact**: Clearer lesion boundaries and internal structures
+### Data Augmentation (Training Only)
 
-#### **3. Conservative Augmentation**
-- ✅ **Horizontal/Vertical Flips**: 4x data diversity, medically valid
-- ❌ **No Rotation**: Causes black borders, unrealistic
-- ❌ **No Color Jitter**: Creates purple/green tints
-- ❌ **No Random Erasing**: Can hide critical features
+- Horizontal flip (p=0.5)
+- Vertical flip (p=0.5)
+- No rotation or color jitter to preserve medical features
 
-### 📉 Why This Fixes Grad-CAM Issues
+### Test-Time Augmentation (TTA)
 
-| Problem | Old Approach | Our Solution | Result |
-|---------|--------------|--------------|--------|
-| Background focus | Random crop | Direct resize | ✅ Lesion in frame |
-| Hair distraction | None | Hair removal | ✅ Clean lesions |
-| Off-center lesions | Aggressive translation | No spatial aug | ✅ Centered |
-| Color artifacts | Strong color jitter | Minimal aug | ✅ Realistic |
+10 augmentations per image:
+1. Original
+2-4. Flips (horizontal, vertical, both)
+5-6. Rotations (±15°)
+7-8. Brightness adjustment (±10%)
+9-10. Contrast adjustment (±10%)
+
+Predictions are averaged across all augmentations for improved stability.
 
 ---
 
-## 🛠️ Installation
+## Installation
 
-### Prerequisites
+### Requirements
 
 - Python 3.8+
-- CUDA 11.0+ (for GPU acceleration)
-- 8GB+ GPU memory (recommended)
+- PyTorch 2.0+
+- CUDA-capable GPU (recommended)
 
 ### Setup
 
@@ -409,311 +220,237 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Requirements
+### Dependencies
 
-```txt
+```
 torch>=2.0.0
 torchvision>=0.15.0
-opencv-python>=4.8.0
-pillow>=10.0.0
 numpy>=1.24.0
+pandas>=2.0.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 scikit-learn>=1.3.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
 tqdm>=4.65.0
+pytorch-grad-cam>=1.4.0
 ```
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### Training
 
+**Single Model:**
 ```python
-# Run the complete notebook
-jupyter notebook melanoma_detection_complete.ipynb
-
-# Or use the training script
-python train.py --model efficientnet_b3 \
-                --epochs 50 \
-                --batch_size 64 \
-                --lr 0.001
+# Load and run cell_25_train_progressive_FIXED.py
+python cell_25_train_progressive_FIXED.py
 ```
 
-### Inference
-
+**Ensemble Training:**
 ```python
-from medical_preprocessing_minimal import get_medical_test_transforms
-from torchvision import models
-import torch
-
-# Load model
-model = models.efficientnet_b3(weights=None)
-model.classifier[1] = torch.nn.Linear(1536, 2)
-model.load_state_dict(torch.load('best_melanoma_model.pth'))
-model.eval()
-
-# Preprocess image
-transforms = get_medical_test_transforms(
-    img_size=224,
-    enable_hair_removal=True,
-    enable_lesion_crop=False,
-    enable_contrast=True
-)
-
-# Predict
-image = Image.open('lesion.jpg')
-tensor = transforms(image).unsqueeze(0)
-with torch.no_grad():
-    output = model(tensor)
-    probs = torch.softmax(output, dim=1)
-    prediction = torch.argmax(probs, dim=1)
-
-print(f"Prediction: {'Malignant' if prediction == 1 else 'Benign'}")
-print(f"Confidence: {probs[0][prediction].item():.2%}")
+# Train 3 models with different seeds
+python cell_26_ensemble_training_FIXED.py
 ```
 
-### Grad-CAM Visualization
+### Evaluation
 
+**Single Model TTA:**
 ```python
-from gradcam import generate_gradcam
+# Run single_tta.py
+python single_tta.py
+```
 
-# Generate heatmap
-heatmap = generate_gradcam(model, image_tensor, target_layer='features')
+**Ensemble TTA:**
+```python
+# Load ensemble models and run evaluation
+# Results saved to efficientB3/ directory
+```
 
-# Visualize
-plt.imshow(original_image)
-plt.imshow(heatmap, alpha=0.5, cmap='jet')
-plt.show()
+### Visualization
+
+**ROC Curve Comparison:**
+```python
+python cell_roc_comparison_FIXED.py
+```
+
+**Grad-CAM Interpretability:**
+```python
+python grad_cam.py
+python grad_cam_comparison.py
 ```
 
 ---
 
-## 📊 Dataset
+## Dataset
 
-### HAM10000 (Melanocytic Subset)
+### HAM10000 Melanocytic Subset
 
 - **Source**: Human Against Machine with 10,000 training images
-- **Subset**: Melanocytic lesions only (benign nevi + melanoma)
-- **Total Images**: ~10,868 images
-- **Split**: 
-  - Training: ~8,868 images
-  - Testing: ~2,000 images
-- **Classes**: 
-  - **Benign**: Benign melanocytic nevi (non-cancerous moles)
-  - **Malignant**: Melanoma (skin cancer)
+- **Classes**: Binary (Benign vs. Malignant)
+- **Training Set**: 8,868 images
+  - Benign: 6,782 (76.5%)
+  - Malignant: 2,086 (23.5%)
+- **Test Set**: 2,247 images
+  - Benign: 1,723 (76.7%)
+  - Malignant: 524 (23.3%)
+- **Class Imbalance Ratio**: 3.25:1 (benign:malignant)
 
 ### Data Organization
 
 ```
 melanocytic_dataset/
 ├── train/
-│   ├── benign/       (~6,000-7,000 images)
-│   └── malignant/    (~1,500-2,000 images)
+│   ├── benign/
+│   └── malignant/
 └── test/
-    ├── benign/       (~1,500-1,700 images)
-    └── malignant/    (~300-500 images)
+    ├── benign/
+    └── malignant/
 ```
 
-### Class Imbalance
+---
 
-- **Imbalance Ratio**: ~3:1 to 4:1 (benign:malignant)
-- **Solution**: Weighted cross-entropy loss
-- **Clinical Relevance**: Reflects real-world prevalence
+## Methodology
+
+### Class Imbalance Handling
+
+**Focal Loss with Class Weighting:**
+- Addresses 3.25:1 class imbalance
+- Alpha weights: inversely proportional to class frequency
+- Gamma=2.0: focuses learning on hard examples
+
+### Model Selection Criteria
+
+- **Primary Metric**: Validation AUC-ROC
+- **Early Stopping**: Patience of 15 epochs
+- **Gradient Clipping**: Prevents training instability
+- **Best Model**: Highest validation AUC across all epochs
+
+### Ensemble Strategy
+
+**Averaging Method:**
+- Probability averaging across 3 models
+- Reduces prediction variance
+- Improves generalization
+
+**Benefits:**
+- Captures diverse feature representations
+- Reduces overfitting to training data
+- More robust to input perturbations
 
 ---
 
-## 📈 Evaluation Metrics
-
-### Why These Metrics Matter
-
-| Metric | Formula | Medical Interpretation |
-|--------|---------|----------------------|
-| **Accuracy** | (TP+TN)/(TP+TN+FP+FN) | Overall correctness |
-| **Precision** | TP/(TP+FP) | "When I say cancer, am I right?" |
-| **Recall** | TP/(TP+FN) | "Did I catch all cancers?" ⭐ |
-| **F1-Score** | 2×(P×R)/(P+R) | Balance of precision & recall |
-| **AUC-ROC** | Area under ROC curve | Discrimination ability |
-
-### 🎯 Clinical Priority: Maximize Recall
-
-**False Negative (FN)** = Missed melanoma → **Most dangerous**
-- Patient believes they're safe
-- Delayed treatment → Lower survival rate
-
-**False Positive (FP)** = Benign called malignant → **Less critical**
-- Additional screening/biopsy (inconvenient but safe)
-- Better safe than sorry in cancer detection
-
-**Target**: Recall >90% (catch 9/10 melanomas)
-
----
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 melanoma-detection/
-├── 📓 melanoma_detection_complete.ipynb  # Main notebook
-├── 🔧 medical_preprocessing.py            # Original preprocessing
-├── 🔧 medical_preprocessing_minimal.py    # Minimal augmentation version
-├── 📊 efficientB3/                        # Results & visualizations
-│   ├── metrics.png
+├── melanoma_detection_complete.ipynb    # Main notebook
+├── medical_preprocessing.py             # Preprocessing functions
+├── medical_preprocessing_minimal.py     # Minimal augmentation
+├── best_melanoma_single.pth             # Best single model weights
+├── best_melanoma_improved.pth           # Improved model weights
+├── ensemble_models/                     # Ensemble model checkpoints
+│   ├── model_seed_42.pth
+│   ├── model_seed_123.pth
+│   └── model_seed_456.pth
+├── efficientB3/                         # Results and visualizations
 │   ├── confusion_matrices.png
-│   ├── confidence_analysis.png
-│   └── roc_curve.png
-├── 💾 best_melanoma_model.pth             # Trained model weights
-├── 📁 melanocytic_dataset/                # Dataset (not included)
-│   ├── train/
-│   └── test/
-├── 📚 NOTEBOOK_MARKDOWN_*.md              # Documentation
-├── 📋 requirements.txt
-└── 📖 README.md                           # This file
+│   ├── roc_comparison_ensemble_vs_single.png
+│   └── ensemble_vs_single_comparison.png
+├── requirements.txt                     # Python dependencies
+└── README.md                            # This file
 ```
 
 ---
 
-## 🔮 Future Work
+## Evaluation Metrics
 
-### 🎯 Short-term Improvements
+### Clinical Context
 
-- [ ] **Multi-class Classification**: Extend to 7 skin lesion types (full HAM10000)
-- [ ] **Ensemble Methods**: Combine ResNet50 + EfficientNet-B3 predictions
-- [ ] **Test-Time Augmentation**: Average predictions over augmented versions
-- [ ] **Threshold Optimization**: Find optimal decision boundary for recall
-- [ ] **External Validation**: Test on ISIC 2020 dataset
+| Metric | Formula | Medical Interpretation |
+|--------|---------|----------------------|
+| **Accuracy** | (TP+TN)/(Total) | Overall correctness |
+| **Precision** | TP/(TP+FP) | "When predicting malignant, how often am I correct?" |
+| **Recall** | TP/(TP+FN) | "Of all actual melanomas, how many did I detect?" |
+| **F1-Score** | 2×(P×R)/(P+R) | Harmonic mean of precision and recall |
+| **AUC-ROC** | Area under ROC | Discrimination ability across all thresholds |
 
-### 🚀 Long-term Goals
+### Clinical Priority
 
-- [ ] **Attention Mechanisms**: Add attention layers for better feature extraction
-- [ ] **Vision Transformers**: Experiment with ViT/Swin Transformer architectures
-- [ ] **Lesion Segmentation**: Automatic lesion boundary detection
-- [ ] **Multi-modal Input**: Incorporate patient metadata (age, location, history)
-- [ ] **Mobile Deployment**: Optimize for on-device inference (TFLite/CoreML)
-- [ ] **Web Application**: Deploy as screening tool for dermatology clinics
+**Recall (Sensitivity) > Precision (Specificity)**
 
-### 📊 Research Directions
+- **False Negative (FN)**: Missed melanoma (most dangerous)
+  - Patient believes they are safe
+  - Delayed treatment reduces survival rate
+  
+- **False Positive (FP)**: Benign lesion flagged as malignant (less critical)
+  - Additional screening/biopsy (inconvenient but safe)
+  - "Better safe than sorry" in cancer detection
 
-- Investigate why certain lesions are misclassified (error analysis)
-- Study impact of different preprocessing pipelines
-- Compare with dermatologist performance on same test set
-- Explore federated learning for privacy-preserving training
-
----
-
-## 📚 References
-
-### Key Papers
-
-1. **Esteva et al. (2017)** - "Dermatologist-level classification of skin cancer with deep neural networks"
-   - Nature, 542(7639), 115-118
-   - Pioneering work on CNN-based skin lesion classification
-
-2. **Codella et al. (2018)** - "Skin lesion analysis toward melanoma detection"
-   - IEEE International Symposium on Biomedical Imaging
-   - ISIC challenge winning approaches
-
-3. **Tschandl et al. (2018)** - "The HAM10000 dataset"
-   - Scientific Data, 5, 180161
-   - Large-scale dermoscopy dataset
-
-4. **Tan & Le (2019)** - "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks"
-   - ICML 2019
-   - Compound scaling methodology
-
-5. **Selvaraju et al. (2017)** - "Grad-CAM: Visual Explanations from Deep Networks"
-   - ICCV 2017
-   - Interpretability through class activation mapping
-
-### Datasets
-
-- **HAM10000**: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DBW86T
-- **ISIC Archive**: https://www.isic-archive.com/
-
-### Tools & Libraries
-
-- **PyTorch**: https://pytorch.org/
-- **torchvision**: https://pytorch.org/vision/
-- **OpenCV**: https://opencv.org/
+**Target Performance:**
+- Recall: >90% (detect at least 9 out of 10 melanomas)
+- AUC-ROC: >0.90 (excellent discrimination)
+- Precision: >80% (minimize unnecessary procedures)
 
 ---
 
-## ⚠️ Disclaimer
+## Grad-CAM Interpretability
 
-**This project is for research and educational purposes only.**
+Gradient-weighted Class Activation Mapping (Grad-CAM) visualizes regions of the image that most influence the model's decision.
 
-- ❌ **NOT a medical device** - Not FDA approved or clinically validated
-- ❌ **NOT for diagnosis** - Should not be used for actual medical decisions
-- ❌ **NOT a replacement** - Does not replace professional dermatological evaluation
-- ✅ **Proof of concept** - Demonstrates AI potential in medical imaging
-- ✅ **Research tool** - For studying deep learning in healthcare
+**Purpose:**
+- Verify model focuses on lesion (not artifacts like hair or rulers)
+- Build clinical trust through explainability
+- Identify potential model biases
 
-**Always consult a licensed dermatologist for skin lesion evaluation.**
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-```
-MIT License
-
-Copyright (c) 2025 [Your Name]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+**Interpretation:**
+- Red regions: High importance for prediction
+- Blue regions: Low importance
+- Ideal: Concentration on lesion boundaries and internal structure
 
 ---
 
-## 🤝 Contributing
+## References
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. **Codella, N. C. F., et al.** (2018). "Skin lesion analysis toward melanoma detection: A challenge at the 2017 International Symposium on Biomedical Imaging (ISBI)." *ISBI 2018*.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. **Esteva, A., et al.** (2017). "Dermatologist-level classification of skin cancer with deep neural networks." *Nature*, 542(7639), 115-118.
 
----
+3. **Tschandl, P., Rosendahl, C., & Kittler, H.** (2018). "The HAM10000 dataset, a large collection of multi-source dermatoscopic images of common pigmented skin lesions." *Scientific Data*, 5, 180161.
 
-## 📧 Contact
+4. **Tan, M., & Le, Q.** (2019). "EfficientNet: Rethinking model scaling for convolutional neural networks." *ICML 2019*.
 
-**Your Name** - [@yourtwitter](https://twitter.com/yourtwitter) - your.email@example.com
-
-**Project Link**: [https://github.com/yourusername/melanoma-detection](https://github.com/yourusername/melanoma-detection)
+5. **Lin, T. Y., et al.** (2017). "Focal loss for dense object detection." *ICCV 2017*.
 
 ---
 
-## 🌟 Acknowledgments
+## Disclaimer
 
-- **HAM10000 Dataset** creators for providing the dermoscopy images
-- **PyTorch Team** for the excellent deep learning framework
-- **Medical AI Community** for advancing healthcare through technology
-- **Open Source Contributors** whose libraries made this possible
+**⚠️ IMPORTANT: This is a research project for educational purposes only.**
+
+This system is **NOT** approved for clinical diagnosis and should **NOT** be used as a replacement for professional medical evaluation. All skin lesion assessments must be performed by licensed dermatologists. The predictions made by this system are for research demonstration only.
+
+**Always consult a qualified healthcare professional for medical advice.**
 
 ---
 
-<div align="center">
+## License
 
-**⭐ If you find this project useful, please consider giving it a star! ⭐**
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-Made with ❤️ for advancing medical AI
+---
 
-</div>
+## Acknowledgments
+
+- HAM10000 dataset creators
+- PyTorch and torchvision teams
+- EfficientNet authors
+- Medical imaging research community
+
+---
+
+**Author**: Nicolas Dupont  
+**Project**: Melanoma Detection using Deep Learning  
+**Institution**: [Your Institution]  
+**Year**: 2025

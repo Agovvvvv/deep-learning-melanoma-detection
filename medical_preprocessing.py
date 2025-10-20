@@ -356,7 +356,7 @@ def get_medical_test_transforms(img_size=224, enable_hair_removal=True,
 # VISUALIZATION HELPER
 # ============================================================
 
-def visualize_preprocessing_steps(img_path, save_path=None):
+def visualize_preprocessing_steps(img_path):
     """
     Visualizes each preprocessing step for debugging.
     
@@ -372,33 +372,23 @@ def visualize_preprocessing_steps(img_path, save_path=None):
     # Apply each step
     hair_removed = HairRemoval()(original)
     contrast_enhanced = ContrastEnhancement()(hair_removed)
-    lesion_cropped = LesionCropping(margin=0.15)(contrast_enhanced)
     
-    # Plot
-    fig, axes = plt.subplots(2, 2, figsize=(12, 12))
+    # Plot - 3 images in a row
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
     
-    axes[0, 0].imshow(original)
-    axes[0, 0].set_title('Original', fontsize=14, fontweight='bold')
-    axes[0, 0].axis('off')
+    axes[0].imshow(original)
+    axes[0].set_title('Original', fontsize=14, fontweight='bold')
+    axes[0].axis('off')
     
-    axes[0, 1].imshow(hair_removed)
-    axes[0, 1].set_title('After Hair Removal', fontsize=14, fontweight='bold')
-    axes[0, 1].axis('off')
+    axes[1].imshow(hair_removed)
+    axes[1].set_title('After Hair Removal', fontsize=14, fontweight='bold')
+    axes[1].axis('off')
     
-    axes[1, 0].imshow(contrast_enhanced)
-    axes[1, 0].set_title('After Contrast Enhancement', fontsize=14, fontweight='bold')
-    axes[1, 0].axis('off')
-    
-    axes[1, 1].imshow(lesion_cropped)
-    axes[1, 1].set_title('After Lesion Cropping', fontsize=14, fontweight='bold')
-    axes[1, 1].axis('off')
+    axes[2].imshow(contrast_enhanced)
+    axes[2].set_title('After Contrast Enhancement (CLAHE)', fontsize=14, fontweight='bold')
+    axes[2].axis('off')
     
     plt.tight_layout()
-    
-    if save_path:
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
-        print(f"Saved visualization to {save_path}")
-    
     plt.show()
 
 
@@ -408,15 +398,12 @@ if __name__ == "__main__":
     print("="*80)
     print("\nAvailable transforms:")
     print("  • HairRemoval - Removes hair artifacts using morphological operations")
-    print("  • LesionCropping - Crops to lesion region using Otsu thresholding")
     print("  • ContrastEnhancement - CLAHE for better boundary definition")
-    print("  • CenterLesion - Centers lesion in image")
     print("\nPreset pipelines:")
-    print("  • get_medical_train_transforms() - Training with medical preprocessing")
-    print("  • get_medical_test_transforms() - Testing with medical preprocessing")
-    print("\nKey improvements:")
-    print("  ✓ Less aggressive augmentation (keeps lesion centered)")
-    print("  ✓ Hair removal (reduces distraction)")
-    print("  ✓ Lesion-focused cropping (removes background)")
-    print("  ✓ Contrast enhancement (better boundaries)")
+    print("  • get_medical_train_transforms() - Training with hair removal + contrast")
+    print("  • get_medical_test_transforms() - Testing with hair removal + contrast")
+    print("\nActive preprocessing steps:")
+    print("  ✓ Hair removal (reduces artifacts)")
+    print("  ✓ Contrast enhancement (better lesion boundaries)")
+    print("  ✓ Conservative augmentation (flips only)")
     print("="*80)
