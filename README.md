@@ -236,7 +236,7 @@ We achieved a **16.4% improvement in recall** and **26.6% improvement in precisi
 The ROC curve demonstrates the model's ability to discriminate between benign and malignant lesions across all confidence thresholds. The ensemble approach provides more stable predictions through model diversity.
 
 ### Grad-CAM Interpretability Analysis
-![Grad-CAM](images/gradcam_analysis.png)
+![Grad-CAM](images/ensemble_gradcam_analysis.png)
 
 **Model Attention Patterns:**
 

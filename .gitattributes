@@ -1,0 +1,6 @@
+ConvNextBase/*.pth filter=lfs diff=lfs merge=lfs -text
+EfficientNetB3/*.pth filter=lfs diff=lfs merge=lfs -text
+EfficientNetB4/*.pth filter=lfs diff=lfs merge=lfs -text
+ensemble/*.pth filter=lfs diff=lfs merge=lfs -text
+best_melanoma_improved.pth filter=lfs diff=lfs merge=lfs -text
+best_melanoma_single.pth filter=lfs diff=lfs merge=lfs -text
