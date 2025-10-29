@@ -26,7 +26,8 @@ class SimpleViTB16(nn.Module):
         # Extract encoder (all layers except head)
         self.encoder = base_model.encoder
         self.conv_proj = base_model.conv_proj
-        self.class_token = base_model.class_token
+        # Register class_token as a buffer so it moves with the model
+        self.register_buffer('class_token', base_model.class_token)
         
         # ViT-B/16 outputs 768 features
         hidden_dim = base_model.hidden_dim
@@ -123,7 +124,8 @@ class SimpleViTB32(nn.Module):
         # Extract encoder (all layers except head)
         self.encoder = base_model.encoder
         self.conv_proj = base_model.conv_proj
-        self.class_token = base_model.class_token
+        # Register class_token as a buffer so it moves with the model
+        self.register_buffer('class_token', base_model.class_token)
         
         # ViT-B/32 outputs 768 features
         hidden_dim = base_model.hidden_dim
@@ -220,7 +222,8 @@ class SimpleViTL16(nn.Module):
         # Extract encoder (all layers except head)
         self.encoder = base_model.encoder
         self.conv_proj = base_model.conv_proj
-        self.class_token = base_model.class_token
+        # Register class_token as a buffer so it moves with the model
+        self.register_buffer('class_token', base_model.class_token)
         
         # ViT-L/16 outputs 1024 features
         hidden_dim = base_model.hidden_dim
@@ -317,7 +320,8 @@ class SimpleViTL32(nn.Module):
         # Extract encoder (all layers except head)
         self.encoder = base_model.encoder
         self.conv_proj = base_model.conv_proj
-        self.class_token = base_model.class_token
+        # Register class_token as a buffer so it moves with the model
+        self.register_buffer('class_token', base_model.class_token)
         
         # ViT-L/32 outputs 1024 features
         hidden_dim = base_model.hidden_dim

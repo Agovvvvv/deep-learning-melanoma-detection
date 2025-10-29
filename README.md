@@ -176,7 +176,7 @@ All model performances are documented in the [metrics.md](metrics.md) file.
 We achieved a **20.3% improvement in recall** and **29.4% improvement in precision** - detecting nearly all melanomas with near-perfect precision.
 
 📊 **[View All Model Performance Metrics →](metrics.md)** - Compare EfficientNet-B3, EfficientNet-B4, ConvNeXtBase, ViTB16, and various ensemble configurations
-![Confusion Matrices](images/single_confusion_matrices.png)
+![Confusion Matrices](images/ensemble_confusion_matrices.png)
 
 ---
 

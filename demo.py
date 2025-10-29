@@ -1,3 +1,19 @@
+# Low-Cost Deep Learning System for Automated Melanoma Detection
+# Copyright (C) 2025 Nicolò Calandra
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import gradio as gr
 import torch
 from torchvision import transforms
@@ -15,7 +31,7 @@ from medical_preprocessing_final import InpaintingMaskFiller, HairRemoval, Contr
 # MODEL CONFIGURATION
 # ============================================================
 
-MODEL_PATH = 'ensemble/model_seed_42_ConvNeXtBase.pth'
+MODEL_PATH = 'best_melanoma_single.pth'
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Load model
@@ -182,18 +198,22 @@ def predict(input_image, confidence_threshold):
 custom_css = """
 /* --- Main Layout & Theme --- */
 #main-container {
-    max-width: 1280px;
+    max-width: 1400px;
     margin: auto;
     padding-top: 1.5rem;
 }
-/* Apply card styling to Groups */
+
+/* Apply dark card styling to Groups */
 .gradio-group {
-    border: 1px solid #e5e7eb;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    padding: 20px !important;
+    border: 1px solid rgba(75, 85, 99, 0.3);
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    padding: 24px !important;
     margin-top: 20px;
+    background: rgba(31, 41, 55, 0.6);
+    backdrop-filter: blur(10px);
 }
+
 .gradio-tabs {
     border: none !important;
     box-shadow: none !important;
@@ -201,193 +221,256 @@ custom_css = """
 
 /* --- Header --- */
 .header-box {
-    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-    padding: 2.5rem;
-    border-radius: 12px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%);
+    padding: 3rem;
+    border-radius: 16px;
     color: white;
     text-align: center;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(59, 130, 246, 0.3);
 }
+
 .header-box h1 {
-    font-size: 2.8em;
+    font-size: 3.2em;
     margin: 0;
-    font-weight: 700;
-    color: #ffffff;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
 }
+
 .header-box p {
-    font-size: 1.25em;
-    margin: 10px 0 0 0;
-    color: #ffffff;
-    opacity: 0.95;
+    font-size: 1.35em;
+    margin: 12px 0 0 0;
+    color: #cbd5e1;
+    font-weight: 300;
+    letter-spacing: 0.02em;
 }
 
 /* --- Warning & Info Boxes --- */
 .warning-box {
-    background-color: #fffbeb;
-    border: 1px solid #fde68a;
-    border-left: 5px solid #f59e0b;
-    padding: 18px;
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    border-left: 4px solid #fbbf24;
+    padding: 20px;
+    border-radius: 12px;
     margin: 20px 0;
-    color: #78350f !important;
+    color: #fcd34d !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.1);
 }
+
 .warning-box strong {
-    color: #b45309;
-    font-size: 1.05em;
+    color: #fde047;
+    font-size: 1.1em;
 }
+
 .info-box {
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-left: 5px solid #2563eb;
-    padding: 18px;
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.15) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-left: 4px solid #3b82f6;
+    padding: 20px;
+    border-radius: 12px;
     margin: 20px 0;
-    color: #1e3a8a !important;
+    color: #93c5fd !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
 }
+
 .info-box strong {
-    color: #1e40af;
-    font-size: 1.05em;
+    color: #bfdbfe;
+    font-size: 1.1em;
 }
+
 .info-box ul {
-    color: #1e3a8a !important;
+    color: #93c5fd !important;
     margin: 10px 0 0 20px;
 }
 
 /* --- Buttons --- */
 .primary-btn {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-    border: none !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border: 1px solid rgba(59, 130, 246, 0.5) !important;
     color: white !important;
     font-weight: 600 !important;
-    padding: 14px 28px !important;
-    font-size: 1.1em !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2) !important;
-    transition: all 0.3s ease !important;
+    padding: 16px 32px !important;
+    font-size: 1.15em !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
+
 .primary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3) !important;
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5) !important;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
 }
 
 /* --- Image Upload --- */
 .image-upload {
-    border: 3px dashed #cbd5e1;
-    border-radius: 12px;
-    transition: all 0.3s;
-    background-color: #f8fafc;
+    border: 3px dashed rgba(100, 116, 139, 0.5);
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(15, 23, 42, 0.4);
 }
+
 .image-upload:hover {
-    border-color: #2563eb;
-    background-color: #eff6ff;
+    border-color: #3b82f6;
+    background: rgba(30, 41, 59, 0.6);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
 }
 
 /* --- Result Components (Right Column) --- */
 .result-box {
     border: 2px solid;
-    border-radius: 12px;
-    padding: 1.5rem;
+    border-radius: 16px;
+    padding: 2rem;
     text-align: center;
-    background-color: #fdfdff;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(10px);
     margin-bottom: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
+
 .result-box-prediction {
-    font-size: 2.5em;
-    font-weight: 800;
+    font-size: 2.8em;
+    font-weight: 900;
     margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
+
 .result-box-risk {
-    font-size: 1.25em;
-    color: #374151 !important;
+    font-size: 1.35em;
+    color: #e2e8f0 !important;
+    font-weight: 500;
 }
+
 .status-box {
     display: flex;
     align-items: center;
-    padding: 1rem;
-    border-radius: 8px;
-    font-size: 1.05em;
+    padding: 1.25rem;
+    border-radius: 12px;
+    font-size: 1.1em;
     margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
+
 .status-box-confident {
-    background-color: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #15803d !important;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    color: #6ee7b7 !important;
 }
+
 .status-box-uncertain {
-    background-color: #fffbeb;
-    border: 1px solid #fde68a;
-    color: #b45309 !important;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(245, 158, 11, 0.2) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fcd34d !important;
 }
+
 .recommendation-box {
     display: flex;
     align-items: flex-start;
-    padding: 1.25rem;
-    border-radius: 8px;
-    font-size: 1.05em;
+    padding: 1.5rem;
+    border-radius: 12px;
+    font-size: 1.1em;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
+
 .recommendation-icon {
-    font-size: 1.8em;
-    margin-right: 12px;
+    font-size: 2em;
+    margin-right: 14px;
     line-height: 1;
 }
+
 .recommendation-box p {
     margin: 0;
-    line-height: 1.6;
+    line-height: 1.7;
 }
+
 .recommendation-box-high {
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #b91c1c !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: #fca5a5 !important;
 }
+
 .recommendation-box-moderate {
-    background-color: #fffbeb;
-    border: 1px solid #fde68a;
-    color: #b45309 !important;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(245, 158, 11, 0.2) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fcd34d !important;
 }
+
 .recommendation-box-low {
-    background-color: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    color: #15803d !important;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    color: #6ee7b7 !important;
 }
 
 /* --- Probability Bars --- */
 .prob-container {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
 }
+
 .prob-bar-label {
     display: flex;
     justify-content: space-between;
-    font-size: 0.95em;
-    font-weight: 500;
-    color: #374151 !important;
-    margin-bottom: 0.25rem;
-}
-.prob-bar-percent {
+    font-size: 1em;
     font-weight: 600;
+    color: #e2e8f0 !important;
+    margin-bottom: 0.5rem;
 }
+
+.prob-bar-percent {
+    font-weight: 700;
+    color: #cbd5e1 !important;
+}
+
 .prob-bar-bg {
     width: 100%;
-    background-color: #e5e7eb;
-    border-radius: 6px;
-    height: 18px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    border-radius: 10px;
+    height: 24px;
     overflow: hidden;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
 }
+
 .prob-bar-fill {
     height: 100%;
-    border-radius: 6px;
-    transition: width 0.6s ease;
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 /* --- Footer --- */
 .footer-text {
     text-align: center;
-    color: #6b7280;
-    font-size: 0.95em;
-    margin-top: 30px;
-    padding: 20px;
-    border-top: 1px solid #e5e7eb;
+    color: #94a3b8;
+    font-size: 1em;
+    margin-top: 40px;
+    padding: 24px;
+    border-top: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.footer-text p {
+    color: #94a3b8;
+}
+
+/* --- Global Text Improvements --- */
+.gradio-markdown h3 {
+    color: #f1f5f9 !important;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.gradio-markdown h4 {
+    color: #cbd5e1 !important;
+    font-weight: 600;
 }
 """
 
@@ -395,11 +478,31 @@ custom_css = """
 # GRADIO INTERFACE
 # ============================================================
 
-# Use a modern, clean theme
-theme = gr.themes.Default(
+# Use a professional dark theme
+theme = gr.themes.Soft(
     primary_hue="blue", 
-    secondary_hue="blue", 
-    radius_size=gr.themes.sizes.radius_lg
+    secondary_hue="cyan",
+    neutral_hue="slate",
+    radius_size=gr.themes.sizes.radius_lg,
+    font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"],
+).set(
+    body_background_fill="linear-gradient(to bottom, #0f172a, #1e293b)",
+    body_background_fill_dark="linear-gradient(to bottom, #0f172a, #1e293b)",
+    block_background_fill="*neutral_950",
+    block_background_fill_dark="*neutral_950",
+    block_border_width="1px",
+    block_label_text_color="*neutral_200",
+    block_label_text_color_dark="*neutral_200",
+    block_title_text_color="*neutral_100",
+    block_title_text_color_dark="*neutral_100",
+    input_background_fill="*neutral_800",
+    input_background_fill_dark="*neutral_800",
+    button_primary_background_fill="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+    button_primary_background_fill_dark="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+    button_primary_background_fill_hover="linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+    button_primary_background_fill_hover_dark="linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+    button_primary_text_color="white",
+    button_primary_text_color_dark="white",
 )
 
 with gr.Blocks(css=custom_css, theme=theme) as demo:
