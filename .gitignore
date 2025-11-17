@@ -7,3 +7,6 @@ theory
 ISIC-images
 .windsurf
 Ensemble2
+
+best_classic_control.pth
+best_qcnn.pth
